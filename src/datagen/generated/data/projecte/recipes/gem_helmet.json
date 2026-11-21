@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    {
+      "item": "projecte:rm_helmet"
+    },
+    {
+      "item": "projecte:evertide_amulet"
+    },
+    {
+      "item": "projecte:soul_stone"
+    },
+    {
+      "item": "projecte:klein_star_omega"
+    }
+  ],
+  "result": {
+    "item": "projecte:gem_helmet"
+  }
+}

@@ -1,0 +1,202 @@
+import java.util.function.Consumer
+
+plugins {
+    id('java')
+    id('eclipse')
+    id('idea')
+    id('maven-publish')
+    id('fabric-loom') version("${loom_version}")
+}
+
+tasks.named('wrapper', Wrapper) {
+    distributionUrl = 'https://mirrors.cloud.tencent.com/gradle/gradle-8.12.1-all.zip'
+}
+
+defaultTasks 'build'
+
+version = "${projecte_version}"
+group = "moze_intel.projecte"
+project.base.archivesName = "ProjectE-Rebirth-${minecraft_version}"
+
+sourceSets {
+    api {
+        // The API has no resources; it holds the public addon surface (capabilities, mappers, events)
+        resources.srcDirs = []
+    }
+    main {
+        resources {
+            srcDirs += 'src/datagen/generated'
+            exclude '.cache'
+        }
+        compileClasspath += api.output
+        runtimeClasspath += api.output
+    }
+    test {
+        resources.srcDirs = []
+    }
+}
+
+configurations {
+    extendConfigurations(implementation, apiImplementation)
+    extendConfigurations(compileOnly, apiCompileOnly)
+    extendConfigurations(runtimeOnly, apiRuntimeOnly)
+}
+
+static void extendConfigurations(Configuration base, Configuration... configurations) {
+    for (def configuration : configurations) {
+        configuration.extendsFrom(base)
+    }
+}
+
+java {
+    // Minecraft 1.20.1 runs on Java 17 bytecode. We compile with the installed JDK 21 and target 17.
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+    withSourcesJar()
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    options.release = 17
+    options.compilerArgs.addAll(['-Xmaxerrs', '100000', '-parameters'])
+}
+
+loom {
+    accessWidenerPath = file('src/main/resources/projecte.accesswidener')
+
+    mods {
+        projecte {
+            sourceSet(sourceSets.main)
+            sourceSet(sourceSets.api)
+        }
+    }
+
+    runs {
+        client {
+            client()
+            configName = 'Fabric Client'
+            property('projecte.skip_top', 'true')
+        }
+        server {
+            server()
+            configName = 'Fabric Server'
+            programArg('--nogui')
+        }
+    }
+}
+
+sourceSets.api.compileClasspath += configurations.compileClasspath
+
+static void exclusiveRepo(RepositoryHandler handler, String url, String... groups) {
+    handler.exclusiveContent {
+        it.forRepositories(handler.maven { setUrl(url) })
+        it.filter { f ->
+            for (def group : groups) {
+                f.includeGroup(group)
+            }
+        }
+    }
+}
+
+repositories { RepositoryHandler handler ->
+    mavenLocal()
+    maven { name = 'AliyunPublic'; url = 'https://maven.aliyun.com/repository/public' }
+    maven { name = 'AliyunCentral'; url = 'https://maven.aliyun.com/repository/central' }
+    mavenCentral()
+    maven { name = 'Parchment'; url = 'https://maven.parchmentmc.org' }
+    exclusiveRepo(handler, 'https://maven.blamejared.com', 'mezz.jei')
+    exclusiveRepo(handler, 'https://maven.terraformersmc.com/', 'dev.emi')
+    exclusiveRepo(handler, 'https://maven.shedaniel.me/', 'me.shedaniel', 'me.shedaniel.cloth')
+    // Plain repository rather than an exclusive one: cardinal-components lives here under dev.onyxstudios and Gradle only looks at
+    // exclusiveContent repositories when the group filter matches, which made the CCA lookup fail with "Could not find".
+    maven { name = 'Ladysnake'; url = 'https://maven.ladysnake.org/releases' }
+    exclusiveRepo(handler, 'https://maven2.bai.lol', 'lol.bai', 'mcp.mobius.waila')
+    exclusiveRepo(handler, 'https://api.modrinth.com/maven', 'maven.modrinth')
+}
+
+dependencies {
+    minecraft("com.mojang:minecraft:${minecraft_version}")
+    mappings(loom.layered {
+        officialMojangMappings()
+        parchment("org.parchmentmc.data:parchment-${parchment_minecraft_version}:${parchment_version}@zip")
+    })
+    modImplementation("net.fabricmc:fabric-loader:${loader_version}")
+    modImplementation("net.fabricmc.fabric-api:fabric-api:${fabric_version}")
+
+    compileOnly("com.google.code.findbugs:jsr305:3.0.2")
+    // Math library used by the EMC solver
+    include(implementation("org.apache.commons:commons-math3:${commons_math_version}"))
+
+    // JEI is compile-time only: nothing is bundled into the jar (no modImplementation, no include), so players without JEI still load fine.
+    // The Fabric artifact pulls jei-1.20.1-common-api / jei-1.20.1-fabric-api transitively; those carry the actual API classes.
+    // Deliberately no modLocalRuntime: JEI is client-only and its fabric.mod.json demands fabricloader >=0.16.3, so putting it on the
+    // dev runtime makes runServer fail with HARD_DEP_NO_CANDIDATE. Uncomment the line below only for a local runClient check.
+    modCompileOnly("mezz.jei:jei-1.20.1-fabric:${jei_version}")
+    // modLocalRuntime("mezz.jei:jei-1.20.1-fabric:${jei_version}")
+
+    // Trinkets is an optional integration as well: compile-time only, and the bridge is guarded by IntegrationHelper.isLoaded, so nothing is bundled and
+    // players without trinkets load fine. Coordinates and repository mirror what ProjectEF uses.
+    modCompileOnly("maven.modrinth:trinkets:${trinkets_version}")
+    // TrinketComponent extends Cardinal Components' ComponentV3, and Trinkets ships CCA as jar-in-jar which is not transitive for compilation.
+    modCompileOnly("dev.onyxstudios.cardinal-components-api:cardinal-components-base:${cca_version}")
+    modCompileOnly("dev.onyxstudios.cardinal-components-api:cardinal-components-entity:${cca_version}")
+
+    testImplementation("org.junit.jupiter:junit-jupiter-api:${junit_version}")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${junit_version}")
+}
+
+test {
+    useJUnitPlatform()
+}
+
+tasks.named('processResources', ProcessResources) {
+    duplicatesStrategy = DuplicatesStrategy.FAIL
+    def versionProperties = ["version"             : projecte_version,
+                             "minecraft_version"   : minecraft_version_range,
+                             "loader_version_range": loader_version_range]
+    inputs.properties(versionProperties)
+    filesMatching('fabric.mod.json') {
+        expand versionProperties
+    }
+    // Reference file kept from the Forge branch until the access widener conversion is fully validated
+    exclude('META-INF/accesstransformer.cfg')
+    // Forge metadata has no meaning on Fabric and would confuse mod scanners
+    exclude('META-INF/mods.toml', 'META-INF/mods.toml.orig')
+}
+
+tasks.named('jar', Jar) {
+    duplicatesStrategy = DuplicatesStrategy.FAIL
+    from(sourceSets.api.output)
+}
+
+tasks.named('sourcesJar', Jar) {
+    dependsOn(classes, apiClasses)
+    duplicatesStrategy = DuplicatesStrategy.FAIL
+    from(sourceSets.api.allJava)
+}
+
+def apiJar = tasks.register('apiJar', Jar) {
+    duplicatesStrategy = DuplicatesStrategy.FAIL
+    archiveClassifier.set("api")
+    from(sourceSets.api.output)
+}
+
+tasks.withType(Javadoc).configureEach({
+    options.encoding = 'UTF-8'
+})
+
+artifacts {
+    archives(apiJar)
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) { MavenPublication publication ->
+            publication.from(components.java)
+            publication.groupId = project.group
+            publication.version = project.version
+            publication.artifactId = 'ProjectE-Fabric'
+            publication.artifact(apiJar)
+        }
+    }
+}

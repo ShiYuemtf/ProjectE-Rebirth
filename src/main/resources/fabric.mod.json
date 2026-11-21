@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 1,
+  "id": "projecte",
+  "version": "${version}",
+  "name": "等价交换：重生 (ProjectE: Rebirth)",
+  "description": "ProjectE: Rebirth — 等价交换：重生，Minecraft 1.20.1 的 Fabric 移植版。",
+  "authors": [
+    "sinkillerj",
+    "ProjectE contributors"
+  ],
+  "license": "MIT",
+  "icon": "icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "moze_intel.projecte.PECore",
+      "moze_intel.projecte.events.PlayerEvents",
+      "moze_intel.projecte.events.TickEvents"
+    ],
+    "client": [
+      "moze_intel.projecte.ClientRegistration"
+    ],
+    "jei_mod_plugin": [
+      "moze_intel.projecte.integration.jei.PEJeiPlugin"
+    ]
+  },
+  "accessWidener": "projecte.accesswidener",
+  "mixins": [
+    "projecte.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": "${loader_version_range}",
+    "fabric-api": "*",
+    "minecraft": "${minecraft_version}"
+  },
+  "suggests": {
+    "jei": "*"
+  },
+  "custom": {
+    "projecte:emc_mappers": [
+      "moze_intel.projecte.emc.mappers.APICustomEMCMapper",
+      "moze_intel.projecte.emc.mappers.BrewingMapper",
+      "moze_intel.projecte.emc.mappers.CustomEMCMapper",
+      "moze_intel.projecte.emc.mappers.OreBlacklistMapper",
+      "moze_intel.projecte.emc.mappers.RawOreBlacklistMapper",
+      "moze_intel.projecte.emc.mappers.TippedArrowMapper",
+      "moze_intel.projecte.emc.mappers.WeatheredCopperMapper",
+      "moze_intel.projecte.emc.mappers.customConversions.CustomConversionMapper",
+      "moze_intel.projecte.emc.mappers.recipe.CraftingMapper"
+    ],
+    "projecte:recipe_type_mappers": [
+      "moze_intel.projecte.emc.mappers.recipe.FallbackRecipeTypeMapper",
+      "moze_intel.projecte.emc.mappers.recipe.SmithingRecipeMapper",
+      "moze_intel.projecte.emc.mappers.recipe.VanillaRecipeTypeMapper"
+    ],
+    "projecte:nbt_processors": [
+      "moze_intel.projecte.emc.nbt.processor.ArmorTrimProcessor",
+      "moze_intel.projecte.emc.nbt.processor.DamageProcessor",
+      "moze_intel.projecte.emc.nbt.processor.DecoratedPotProcessor",
+      "moze_intel.projecte.emc.nbt.processor.EnchantmentProcessor",
+      "moze_intel.projecte.emc.nbt.processor.StoredEMCProcessor"
+    ]
+  }
+}

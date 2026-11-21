@@ -1,0 +1,20 @@
+{
+  "required": true,
+  "package": "moze_intel.projecte.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": [
+    "PrimedTntMixin",
+    "EntityMixin",
+    "ItemEntityMixin",
+    "ItemStackMixin",
+    "LivingEntityMixin",
+    "PlayerCapabilityMixin"
+  ],
+  "client": [
+    "client.AbstractClientPlayerMixin",
+    "client.ItemInHandRendererMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

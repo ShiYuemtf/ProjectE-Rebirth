@@ -1,0 +1,37 @@
+# Gradle / Loom
+.gradle/
+.gradle-home/
+build/
+out/
+run/
+run-*/
+loom-cache/
+
+# IDE
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+.settings/
+.classpath
+.project
+bin/
+eclipse/
+
+# 构建与运行日志
+*.log
+errors.txt
+build-log.txt
+
+# 临时文件
+*.jar.installing
+*.orig
+*.rej
+*.bak
+*~
+
+# 系统
+.DS_Store
+Thumbs.db
+desktop.ini

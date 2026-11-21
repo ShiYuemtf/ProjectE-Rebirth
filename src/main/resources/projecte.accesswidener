@@ -1,0 +1,41 @@
+accessWidener v2 named
+
+# Converted from META-INF/accesstransformer.cfg (Forge 1.20.1 AT, SRG names -> Mojang official names)
+
+accessible field net/minecraft/world/item/crafting/SmithingTransformRecipe base Lnet/minecraft/world/item/crafting/Ingredient;
+accessible field net/minecraft/world/item/crafting/SmithingTransformRecipe addition Lnet/minecraft/world/item/crafting/Ingredient;
+accessible field net/minecraft/world/item/crafting/SmithingTransformRecipe template Lnet/minecraft/world/item/crafting/Ingredient;
+accessible field net/minecraft/world/item/crafting/SmithingTrimRecipe template Lnet/minecraft/world/item/crafting/Ingredient;
+accessible field net/minecraft/world/item/crafting/SmithingTrimRecipe base Lnet/minecraft/world/item/crafting/Ingredient;
+accessible field net/minecraft/world/item/crafting/SmithingTrimRecipe addition Lnet/minecraft/world/item/crafting/Ingredient;
+
+accessible field net/minecraft/world/item/alchemy/PotionBrewing POTION_MIXES Ljava/util/List;
+accessible field net/minecraft/world/item/alchemy/PotionBrewing CONTAINER_MIXES Ljava/util/List;
+accessible field net/minecraft/world/item/alchemy/PotionBrewing ALLOWED_CONTAINERS Ljava/util/List;
+accessible class net/minecraft/world/item/alchemy/PotionBrewing$Mix
+accessible field net/minecraft/world/item/alchemy/PotionBrewing$Mix ingredient Lnet/minecraft/world/item/crafting/Ingredient;
+
+accessible field net/minecraft/world/level/chunk/LevelChunk tickersInLevel Ljava/util/Map;
+accessible method net/minecraft/world/level/chunk/LevelChunk isTicking (Lnet/minecraft/core/BlockPos;)Z
+accessible class net/minecraft/world/level/chunk/LevelChunk$BoundTickingBlockEntity
+accessible field net/minecraft/world/level/chunk/LevelChunk$BoundTickingBlockEntity ticker Lnet/minecraft/world/level/block/entity/BlockEntityTicker;
+accessible class net/minecraft/world/level/chunk/LevelChunk$RebindableTickingBlockEntityWrapper
+accessible field net/minecraft/world/level/chunk/LevelChunk$RebindableTickingBlockEntityWrapper ticker Lnet/minecraft/world/level/block/entity/TickingBlockEntity;
+
+# 1.20.1 keeps the furnace fuel table private, ProjectE's own furnaces query it for burn time
+accessible method net/minecraft/world/level/block/entity/AbstractFurnaceBlockEntity getFuel ()Ljava/util/Map;
+
+# Custom command argument types have to be injected into the private class lookup map, 1.20.1 has no public register
+accessible field net/minecraft/commands/synchronization/ArgumentTypeInfos BY_CLASS Ljava/util/Map;
+
+# Mind Stone moves experience between orbs, which needs the vanilla field
+accessible field net/minecraft/world/entity/ExperienceOrb value I
+
+# Needed so PhilosophersStone can point the final field at itself and survive crafting
+mutable field net/minecraft/world/item/Item craftingRemainingItem Lnet/minecraft/world/item/Item;
+accessible field net/minecraft/world/item/Item craftingRemainingItem Lnet/minecraft/world/item/Item;
+
+# The AOE tool conversions rebuild Forge's BlockState#getToolModifiedState from these vanilla tables
+accessible field net/minecraft/world/item/AxeItem STRIPPABLES Ljava/util/Map;
+accessible field net/minecraft/world/item/ShovelItem FLATTENABLES Ljava/util/Map;
+accessible field net/minecraft/world/item/HoeItem TILLABLES Ljava/util/Map;
