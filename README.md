@@ -2,6 +2,8 @@
 
 **等价交换（ProjectE）的 Fabric 非官方移植版。**
 
+> 搜索关键词：**等价交换1.20.1fabric** ｜ 等价交换 1.20.1 Fabric ｜ ProjectE Fabric 移植
+
 本仓库把官方 [ProjectE](https://github.com/sinkillerj/ProjectE)（`mc1.20.x` 分支，Forge 版）完整移植到 **Fabric 1.20.1**。所有游戏内容、EMC 数值、配方、机制都以 Forge 版为基准复刻，不是重写也不是简化版。
 
 | 项目 | 说明 |
